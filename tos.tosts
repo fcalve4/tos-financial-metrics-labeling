@@ -1,0 +1,276 @@
+# Financial Fundamentals Labels
+declare real_size;
+input showLabels = yes;  # Set to "no" to hide all labels
+# Individual switches for each label
+input showPELabel = yes;
+input showPSLabel = yes;
+input showPBlabel = yes;
+input showPFCFlabel = yes;
+input showPEGLabel = yes;
+input showEPSLabel = yes;
+input showPTBlabel = yes;
+input showPNAVlabel = yes;
+input showFreeCashFlowLabel = yes;
+input showGrossProfitMarginLabel = yes;
+input showOperatingProfitMarginLabel = yes;
+input showNetProfitMarginLabel = yes;
+input showCurrentRatioLabel = yes;
+input showQuickRatioLabel = yes;
+input showReturnOnAssetsLabel = yes;
+input showReturnOnEquityLabel = yes;
+input showSalesPerShareLabel = yes;
+input showFixedChargeCoverageLabel = yes;
+input showTotalAssetTurnoverLabel = yes;
+input showFinancialLeverageLabel = yes;
+input showBookValueLabel = yes;
+input showLongTermDebtLabel = yes;
+input showInventoryTurnoverLabel = yes;
+input showDividendPayoutLabel = yes;
+input showDividendPerShareLabel = yes;
+input showDividendYieldLabel = yes;  # New input for Dividend Yield label
+input showInterestRateLabel = yes;
+input showTaxRateLabel = yes;
+
+# Define global colors
+DefineGlobalColor("RED", CreateColor(255, 0, 0));
+DefineGlobalColor("ORANGE", CreateColor(255, 165, 0));
+DefineGlobalColor("LIGHTYELLOW", CreateColor(245, 243, 140));
+DefineGlobalColor("YELLOW", CreateColor(255, 255, 0));
+DefineGlobalColor("LIGHTGREEN", CreateColor(144, 238, 144));
+DefineGlobalColor("GREEN", CreateColor(0, 128, 0));
+DefineGlobalColor("DARKGREEN", CreateColor(1, 50, 32));
+DefineGlobalColor("NEUTRAL", Color.WHITE);
+DefineGlobalColor("LIGHTPINK", CreateColor(255, 182, 193));
+
+# P/E Ratio label
+def earningsValue = if IsNaN(GetActualEarnings()) then 0 else GetActualEarnings();
+def earningsTTM = Sum(earningsValue, 252);
+plot pe = close / earningsTTM;
+AddLabel(showLabels and showPELabel and !isNaN(pe) and pe < 1000000, "P/E Ratio = " + Round(pe, 2),
+    if pe < 5 then GlobalColor("RED") else
+    if pe < 10 then GlobalColor("ORANGE") else
+    if pe < 15 then GlobalColor("LIGHTYELLOW") else
+    if pe < 20 then GlobalColor("YELLOW") else
+    if pe < 30 then GlobalColor("LIGHTGREEN") else
+    if pe < 50 then GlobalColor("GREEN") else GlobalColor("DARKGREEN"));
+
+# P/S Ratio Label
+def sps = if IsNaN(SalesPerShare()) then sps[1] else SalesPerShare();
+def ptsr = if (close / sps) > 0 then close / sps else 0;
+AddLabel(showLabels and showPSLabel and !isNaN(ptsr) and ptsr < 1000000, "P/S Ratio: " + ptsr,
+    if ptsr < 1 then GlobalColor("RED") else
+    if ptsr < 2 then GlobalColor("ORANGE") else
+    if ptsr < 4 then GlobalColor("LIGHTYELLOW") else
+    if ptsr < 6 then GlobalColor("YELLOW") else
+    if ptsr < 10 then GlobalColor("LIGHTGREEN") else
+    if ptsr < 20 then GlobalColor("GREEN") else GlobalColor("DARKGREEN"));
+
+# P/B Ratio Label
+def current = close;
+def BookValue = BookValuePerShare(GetSymbol(), FiscalPeriod.YEAR);
+plot pb_ratio = current / BookValue;
+plot one = 1;
+AddLabel(showLabels and showPBlabel and !isNaN(pb_ratio), "P/B Ratio: " + pb_ratio,
+    if pb_ratio < 0.8 then GlobalColor("RED") else
+    if pb_ratio < 1 then GlobalColor("ORANGE") else
+    if pb_ratio < 2 then GlobalColor("LIGHTYELLOW") else
+    if pb_ratio < 3 then GlobalColor("YELLOW") else
+    if pb_ratio < 5 then GlobalColor("LIGHTGREEN") else
+    if pb_ratio < 10 then GlobalColor("GREEN") else GlobalColor("DARKGREEN"));
+
+# Price to Free Cash Flow Ratio Label
+input FreeCashFlowPerShare = 5.00;
+plot pfcf_ratio = if FreeCashFlowPerShare != 0 then current / FreeCashFlowPerShare else Double.NaN;
+plot o = 1;
+AddLabel(showLabels and showPFCFlabel and !isNaN(pfcf_ratio), "P/FCF Ratio: " + pfcf_ratio,
+    if pfcf_ratio < 3 then GlobalColor("RED") else
+    if pfcf_ratio < 6 then GlobalColor("ORANGE") else
+    if pfcf_ratio < 12 then GlobalColor("LIGHTYELLOW") else
+    if pfcf_ratio < 20 then GlobalColor("YELLOW") else
+    if pfcf_ratio < 30 then GlobalColor("LIGHTGREEN") else
+    if pfcf_ratio < 50 then GlobalColor("GREEN") else GlobalColor("DARKGREEN"));
+
+# EPS label
+def EPS = EarningsPerShareTTM(fiscalPeriod = FiscalPeriod.YEAR);
+AddLabel(showLabels and showEPSLabel and !isNaN(EPS), "EPS: " + AsDollars(EPS),
+    if EPS > 0 then Color.GREEN else Color.LIGHT_RED);
+
+#P/E to Gowrth Ratio Label
+input GrowthRate = 10.00;
+def pe_ratio = if EPS != 0 then current / EPS else Double.NaN;
+plot peg_ratio = if GrowthRate != 0 then pe_ratio / GrowthRate else Double.NaN;
+AddLabel(showLabels and showPEGLabel and !isNaN(peg_ratio), "P/E to Growth Ratio: " + peg_ratio,
+    if peg_ratio < 0.5 then GlobalColor("GREEN") else
+    if peg_ratio < 1 then GlobalColor("LIGHTGREEN") else
+    if peg_ratio < 1.5 then GlobalColor("YELLOW") else
+    if peg_ratio < 2 then GlobalColor("ORANGE") else GlobalColor("RED"));
+    
+
+# Price to Tangible Book Value Label
+input TangibleBookValuePerShare = 10.00;
+plot ptb_ratio = if TangibleBookValuePerShare != 0 then current / TangibleBookValuePerShare else Double.NaN;
+AddLabel(showLabels and showPTBlabel and !isNaN(ptb_ratio), "P/TB Ratio: " + Round(ptb_ratio, 2), 
+    if ptb_ratio < 0.5 then GlobalColor("GREEN") else
+    if ptb_ratio < 0.8 then GlobalColor("LIGHTGREEN") else
+    if ptb_ratio < 1 then GlobalColor("YELLOW") else
+    if ptb_ratio < 1.5 then GlobalColor("LIGHTYELLOW") else
+    if ptb_ratio < 2 then GlobalColor("ORANGE") else GlobalColor("RED"));
+
+# Price to Net Asset Ratio
+def currentPrice = close;
+input NetAssetValue = 50.00;
+def pNavRatio = if NetAssetValue != 0 then currentPrice / NetAssetValue else Double.NaN;
+AddLabel(showLabels and showPNAVlabel and !isNaN(pNavRatio), "P/NAV Ratio: " + Round(pNavRatio, 2),
+    if pNavRatio < 0.5 then GlobalColor("GREEN") else
+    if pNavRatio < 0.8 then GlobalColor("LIGHTGREEN") else
+    if pNavRatio < 1 then GlobalColor("YELLOW") else
+    if pNavRatio < 1.5 then GlobalColor("LIGHTYELLOW") else
+    if pNavRatio < 2 then GlobalColor("ORANGE") else GlobalColor("RED"));
+
+# Free Cash Flow Per Share label
+def FreeCashFlowPerSh = FreeCashFlowPerShare();
+AddLabel(showLabels and showFreeCashFlowLabel and !IsNaN(FreeCashFlowPerSh), "Free Cash Flow Per Share = " + AsDollars(FreeCashFlowPerSh),
+    if FreeCashFlowPerSh < 0 then GlobalColor("RED") else
+    if FreeCashFlowPerSh < 1 then GlobalColor("ORANGE") else
+    if FreeCashFlowPerSh < 3 then GlobalColor("YELLOW") else
+    if FreeCashFlowPerSh < 5 then GlobalColor("LIGHTGREEN") else
+    if FreeCashFlowPerSh < 10 then GlobalColor("GREEN") else GlobalColor("DARKGREEN"));
+
+# Gross Profit Margin label
+def Gross_Profit_Margin = GrossProfitMargin();
+AddLabel(showLabels and showGrossProfitMarginLabel and !isNaN(Gross_Profit_Margin), "Gross Profit Margin = " + Round(Gross_Profit_Margin, 2),
+    if Gross_Profit_Margin < 0 then GlobalColor("RED") else
+    if Gross_Profit_Margin < 1 then GlobalColor("ORANGE") else
+    if Gross_Profit_Margin < 3 then GlobalColor("YELLOW") else
+    if Gross_Profit_Margin < 5 then GlobalColor("LIGHTGREEN") else
+    if Gross_Profit_Margin < 10 then GlobalColor("GREEN") else GlobalColor("DARKGREEN"));
+
+# Operating Profit Margin label
+def Operating_Profit_Margin = OperatingProfitMargin();
+AddLabel(showLabels and showOperatingProfitMarginLabel and !isNan(Operating_Profit_Margin), "Operating Profit Margin = " + Round(Operating_Profit_Margin, 2),
+    if Operating_Profit_Margin > 0 then GlobalColor("GREEN") else GlobalColor("RED"));
+
+# Net Profit Margin label
+def Net_Profit_Margin = NetProfitMargin();
+AddLabel(showLabels and showNetProfitMarginLabel and !isNaN(Net_Profit_Margin), "Net Profit Margin = " + Round(Net_Profit_Margin, 2),
+    if Net_Profit_Margin < 5 then GlobalColor("RED") else
+    if Net_Profit_Margin < 10 then GlobalColor("ORANGE") else
+    if Net_Profit_Margin < 15 then GlobalColor("YELLOW") else
+    if Net_Profit_Margin < 20 then GlobalColor("LIGHTGREEN") else
+    if Net_Profit_Margin < 30 then GlobalColor("GREEN") else GlobalColor("DARKGREEN"));
+
+# Current Ratio label
+def CurRatio = CurrentRatio();
+AddLabel(showLabels and showCurrentRatioLabel and !isNaN(CurRatio), "Current Ratio = " + Round(CurRatio, 2),
+    if CurRatio < 1 then GlobalColor("RED") else
+    if CurRatio < 1.2 then GlobalColor("ORANGE") else
+    if CurRatio < 1.5 then GlobalColor("YELLOW") else
+    if CurRatio < 2 then GlobalColor("LIGHTGREEN") else
+    if CurRatio < 3 then GlobalColor("GREEN") else GlobalColor("DARKGREEN"));
+
+# Quick Ratio label
+def Quick_Ratio = QuickRatio();
+AddLabel(showLabels and showQuickRatioLabel and !isNaN(Quick_Ratio), "Quick Ratio = " + Round(Quick_Ratio, 2),
+    if Quick_Ratio < 0.5 then GlobalColor("RED") else
+    if Quick_Ratio < 0.7 then GlobalColor("ORANGE") else
+    if Quick_Ratio < 1 then GlobalColor("YELLOW") else
+    if Quick_Ratio < 2 then GlobalColor("GREEN") else GlobalColor("DARKGREEN"));
+
+# Return On Assets label
+def Return_On_Assets = ReturnOnAssets();
+AddLabel(showLabels and showReturnOnAssetsLabel and !isNaN(Return_On_Assets), "Return On Assets = " + Round(Return_On_Assets),
+    if Return_On_Assets < 3 then GlobalColor("RED") else
+    if Return_On_Assets < 6 then GlobalColor("ORANGE") else
+    if Return_On_Assets < 10 then GlobalColor("YELLOW") else
+    if Return_On_Assets < 15 then GlobalColor("LIGHTGREEN") else GlobalColor("GREEN"));
+
+# Return On Equity label
+def Return_On_Equity = ReturnOnEquity();
+AddLabel(showLabels and showReturnOnEquityLabel and !isNaN(Return_On_Equity), "Return On Equity = " + Round(Return_On_Equity),
+    if Return_On_Equity >= 15 then GlobalColor("GREEN") else
+    if Return_On_Equity >= 10 then GlobalColor("LIGHTGREEN") else
+    if Return_On_Equity > 0 then GlobalColor("YELLOW") else GlobalColor("RED"));
+
+# Sales Per Share label
+def Sales_Per_Share = SalesPerShare();
+AddLabel(showLabels and showSalesPerShareLabel and !isNaN(Sales_Per_Share), "Sales Per Share = " + Round(Sales_Per_Share, 2),
+    if Sales_Per_Share < 10 then GlobalColor("RED") else
+    if Sales_Per_Share < 20 then GlobalColor("ORANGE") else
+    if Sales_Per_Share < 50 then GlobalColor("YELLOW") else
+    if Sales_Per_Share < 200 then GlobalColor("GREEN") else GlobalColor("DARKGREEN"));
+
+# Fixed Charge Coverage Ratio label
+def FixChgCovRatio = FixedChargeCoverageRatio();
+AddLabel(showLabels and showFixedChargeCoverageLabel and !isNaN(FixChgCovRatio), "Fixed Charge Coverage Ratio = " + Round(FixChgCovRatio, 2),
+    if FixChgCovRatio < 1 then GlobalColor("RED") else
+    if FixChgCovRatio < 1.5 then GlobalColor("ORANGE") else
+    if FixChgCovRatio < 2.5 then GlobalColor("YELLOW") else
+    if FixChgCovRatio < 3.5 then GlobalColor("LIGHTGREEN") else
+    if FixChgCovRatio < 5 then GlobalColor("GREEN") else GlobalColor("DARKGREEN"));
+
+# Total Asset Turnover label
+def Total_Asset_Turnover = TotalAssetTurnover();
+AddLabel(showLabels and showTotalAssetTurnoverLabel and !isNaN(Total_Asset_Turnover), "Total Asset Turnover = " + Round(Total_Asset_Turnover, 2),
+    if Total_Asset_Turnover < 0.5 then GlobalColor("RED") else
+    if Total_Asset_Turnover < 0.7 then GlobalColor("ORANGE") else
+    if Total_Asset_Turnover < 1 then GlobalColor("YELLOW") else
+    if Total_Asset_Turnover < 1.5 then GlobalColor("LIGHTGREEN") else
+    if Total_Asset_Turnover < 2 then GlobalColor("GREEN") else GlobalColor("DARKGREEN"));
+
+# Financial Leverage label
+def FinLev = FinancialLeverage();
+AddLabel(showLabels and showFinancialLeverageLabel and !isNaN(FinLev), "Financial Leverage = " + Round(FinLev, 2),
+    if FinLev < 0.3 then GlobalColor("DARKGREEN") else
+    if FinLev < 0.5 then GlobalColor("GREEN") else
+    if FinLev < 1 then GlobalColor("LIGHTGREEN") else
+    if FinLev < 1.5 then GlobalColor("YELLOW") else
+    if FinLev < 2 then GlobalColor("ORANGE") else GlobalColor("RED"));
+
+# Book Value Per Share label
+AddLabel(showLabels and showBookValueLabel and !isNaN(BookValue), "Book Value Per Share = " + Round(BookValue),
+    if BookValue < 5 then GlobalColor("RED") else
+    if BookValue < 10 then GlobalColor("ORANGE") else
+    if BookValue < 20 then GlobalColor("YELLOW") else
+    if BookValue < 30 then GlobalColor("LIGHTGREEN") else
+    if BookValue < 50 then GlobalColor("GREEN") else GlobalColor("DARKGREEN"));
+
+# Long Term Debt To Capital label
+def Long_Term_Debt_To_Capital = LongTermDebtToCapital();
+AddLabel(showLabels and showLongTermDebtLabel and !isNaN(Long_Term_Debt_To_Capital), "Long Term Debt To Capital = " + Round(Long_Term_Debt_To_Capital, 2),
+    if Long_Term_Debt_To_Capital < 0.25 then GlobalColor("DARKGREEN") else
+    if Long_Term_Debt_To_Capital < 0.3 then GlobalColor("GREEN") else
+    if Long_Term_Debt_To_Capital < 0.4 then GlobalColor("LIGHTGREEN") else
+    if Long_Term_Debt_To_Capital < 0.6 then GlobalColor("YELLOW") else
+    if Long_Term_Debt_To_Capital < 0.75 then GlobalColor("ORANGE") else GlobalColor("RED"));
+
+# Inventory Turnover label
+def Inventory_Turnover = InventoryTurnover();
+AddLabel(showLabels and showInventoryTurnoverLabel and !isNaN(Inventory_Turnover), "Inventory Turnover = " + Round(Inventory_Turnover, 2),
+    if Inventory_Turnover < 4 then GlobalColor("RED") else
+    if Inventory_Turnover < 6 then GlobalColor("ORANGE") else
+    if Inventory_Turnover < 8 then GlobalColor("YELLOW") else
+    if Inventory_Turnover < 10 then GlobalColor("LIGHTGREEN") else
+    if Inventory_Turnover < 12 then GlobalColor("GREEN") else GlobalColor("DARKGREEN"));
+
+# Dividend Payout label
+def DivPayout = DividendPayout();
+AddLabel(showLabels and showDividendPayoutLabel and !isNaN(DivPayout), "Dividend Payout = " + Round(DivPayout, 2) + "%", GlobalColor("NEUTRAL"));
+
+# Dividend Per Share label
+def DivPerShare = DividendsPerShareTTM();
+AddLabel(showLabels and showDividendPerShareLabel and !isNaN(DivPerShare), "Dividend Per Share = " + AsDollars(DivPerShare), GlobalColor("NEUTRAL"));
+
+# Dividend Yield label
+def DivYield = if IsNaN(DividendsPerShareTTM()) then Double.NaN else DividendsPerShareTTM() / close;
+AddLabel(showLabels and showDividendYieldLabel and !isNaN(DivYield), 
+    "Dividend Yield = " + Round(DivYield * 100, 2) + "%", GlobalColor("NEUTRAL"));
+
+# Interest Rate label
+def Interest_Rate = InterestRate();
+AddLabel(showLabels and showInterestRateLabel and !isNaN(Interest_Rate), "Interest Rate = " + Round(Interest_Rate, 2), GlobalColor("NEUTRAL"));
+
+# Tax Rate label
+def Tax_Rate = TaxRate();
+AddLabel(showLabels and showTaxRateLabel and !isNaN(Tax_Rate), "Tax Rate = " + Round(Tax_Rate, 2), GlobalColor("NEUTRAL"));
+
+
