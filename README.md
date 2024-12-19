@@ -1,6 +1,7 @@
-# tosScript
-Overview
+# Financial Fundamentals Labels for ThinkOrSwim
 Key financial data metrics (labels/ monitors) written in ThinkScript for use in the ThinkOrSwim electronic trading platform. Provides real-time labels displaying key financial data and metrics for individual stocks, allowing traders/investors to make informed decisions at a glance.
+
+![fin_labels_resized](https://github.com/user-attachments/assets/6fdb12d2-8f96-40e5-9f32-d202392dd60c)
 
 Features
  - Customizable Labels: Individual labels for metrics like P/E Ratio, P/S Ratio, EPS, Free Cash Flow, Dividend Yield, and more can be toggled.
