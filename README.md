@@ -31,3 +31,12 @@ Key financial data metrics (labels/ monitors) written in ThinkScript for use in 
  - Dividend Yield
  - Dividend Payout
  - Dividend Per Share
+
+## Getting Started
+1. Import the .tosts file into the thinkScript Studies section of your ThinkOrSwim terminal.
+2. Enable on a chart by selecting Studies/Quick Study/User Defined/{Your Study}.
+3. Customize the displayed labels using the script's input settings.
+4. Monitor stocks effortlessly with real-time, visually enhanced financial data.
+
+## License
+This project is licensed under the [MIT License](LICENSE).
